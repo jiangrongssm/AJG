@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zking.ssm01.mapper.BookMapper" >
+  <!--<cache type="org.mybatis.caches.ehcache.EhcacheCache">-->
+    <!--<property name="timeToIdleSeconds" value="3600"/>-->
+    <!--<property name="timeToLiveSeconds" value="3600"/>-->
+    <!--<property name="maxEntriesLocalHeap" value="1000"/>-->
+    <!--<property name="maxEntriesLocalDisk" value="10000000"/>-->
+    <!--<property name="memoryStoreEvictionPolicy" value="LRU"/>-->
+  <!--</cache>-->
+  <cache type="com.zking.ssm01.redis.RedisCache"/>
+  <resultMap id="BaseResultMap" type="com.zking.ssm01.model.Book" >
+    <constructor >
+      <idArg column="id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="bookname" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="price" jdbcType="REAL" javaType="java.lang.Float" />
+      <arg column="booktype" jdbcType="VARCHAR" javaType="java.lang.String" />
+    </constructor>
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, bookname, price, booktype,photo
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_book
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+    <select useCache="true" id="queryBookPager" resultType="com.zking.ssm01.model.Book"
+            parameterType="com.zking.ssm01.model.Book">
+      SELECT
+      <include refid="Base_Column_List"/>
+      from t_book
+      where 1=1
+      <if test="null!=bookname and ''!=bookname">
+        and bookname like '${bookname}'
+      </if>
+      ORDER BY id DESC
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from t_book
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.zking.ssm01.model.Book" >
+    insert into t_book (id, bookname, price, 
+      booktype)
+    values (#{id,jdbcType=INTEGER}, #{bookname,jdbcType=VARCHAR}, #{price,jdbcType=REAL}, 
+      #{booktype,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.zking.ssm01.model.Book" >
+    insert into t_book
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="bookname != null" >
+        bookname,
+      </if>
+      <if test="price != null" >
+        price,
+      </if>
+      <if test="booktype != null" >
+        booktype,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="bookname != null" >
+        #{bookname,jdbcType=VARCHAR},
+      </if>
+      <if test="price != null" >
+        #{price,jdbcType=REAL},
+      </if>
+      <if test="booktype != null" >
+        #{booktype,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.zking.ssm01.model.Book" >
+    update t_book
+    <set >
+      <if test="bookname != null" >
+        bookname = #{bookname,jdbcType=VARCHAR},
+      </if>
+      <if test="price != null" >
+        price = #{price,jdbcType=REAL},
+      </if>
+      <if test="booktype != null" >
+        booktype = #{booktype,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.zking.ssm01.model.Book" >
+    update t_book
+    set bookname = #{bookname,jdbcType=VARCHAR},
+      price = #{price,jdbcType=REAL},
+      booktype = #{booktype,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+    <update id="updateBookFileBy" parameterType="com.zking.ssm01.model.Book">
+      UPDATE  t_book SET photo=#{photo} WHERE id=#{id}
+    </update>
+</mapper>
